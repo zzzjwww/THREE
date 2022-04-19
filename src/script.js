@@ -3,6 +3,20 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 /**
+ * Txtures
+ */
+const textureLoader = new THREE.TextureLoader()
+const doorColorTexture = textureLoader.load("/textures/door/color.jpg")
+const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg")
+const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/AmbientOcclusion.jpg")
+const doorHeightTexture = textureLoader.load("/textures/door/Height.jpg")
+const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
+const doorMetalnessTexture = textureLoader.load("/textures/door/Metalness.jpg")
+const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
+
+const matcapTexture = textureLoader.load("/textures/matcaps/7.png")
+const gradientTexture = textureLoader.load("/textures/gradients/3.jpg")
+/**
  * Base
  */
 // Canvas
@@ -15,7 +29,22 @@ const scene = new THREE.Scene()
  * Objects
  */
 
-const material = new THREE.MeshBasicMaterial({color:0xff0000})
+// const material = new THREE.MeshBasicMaterial()
+// material.map = doorColorTexture
+// material.color.set("green")
+// material.opacity = 0.5
+// material.transparent = true
+// material.alphaMap = doorAlphaTexture
+// material.side = THREE.DoubleSide
+
+// const material = new THREE.MeshNormalMaterial()
+// material.flatShading = true
+
+// const material = new THREE.MeshMatcapMaterial()
+// material.matcap = matcapTexture
+
+const material = new THREE.MeshDepthMaterial()
+
 const sphere = new THREE.Mesh (
     new THREE.SphereGeometry(0.5,16,16),
     material
@@ -86,6 +115,14 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    //Update objects
+    sphere.rotation.y = 0.1 * elapsedTime
+    plane.rotation.y = 0.1 * elapsedTime
+    torus.rotation.y = 0.1 * elapsedTime
+
+    sphere.rotation.x = 0.15 * elapsedTime
+    plane.rotation.x = 0.15 * elapsedTime
+    torus.rotation.x = 0.15 * elapsedTime
 
     // Update controls
     controls.update()
