@@ -11,6 +11,7 @@ import { RGBA_ASTC_10x10_Format } from 'three'
 /**
  * Txtures
  */
+
 const textureLoader = new THREE.TextureLoader()
 const cubeTextureLoader = new THREE.CubeTextureLoader()
 
@@ -39,7 +40,6 @@ const environmentMapTexture = cubeTextureLoader.load([
 
 /**
  * fonts
- */
 
 const fontLoader = new FontLoader()
 fontLoader.load(
@@ -83,11 +83,9 @@ fontLoader.load(
              scene.add(donuts)
          }
      }
-
-     
  )
  
-
+ */
 
 
 /**
@@ -132,9 +130,9 @@ scene.add(axesHelper)
 // const material = new THREE.MeshToonMaterial()
 // material.gradientMap = gradientTexture
 
-// const material = new THREE.MeshStandardMaterial()
+const material = new THREE.MeshStandardMaterial()
 // material.metalness = 0.45
-// material.roughness = 0.45
+material.roughness = 0.1
 // material.map = doorColorTexture
 // material.aoMap = doorAmbientOcclusionTexture
 // material.aoMapIntensity = 1
@@ -147,43 +145,51 @@ scene.add(axesHelper)
 // material.transparent = true
 // material.alphaMap = doorAlphaTexture
 
-const material = new THREE.MeshStandardMaterial()
-material.metalness = 1
-material.roughness = 0.2
-material.envMap = environmentMapTexture
+// const material = new THREE.MeshStandardMaterial()
+// material.metalness = 1
+// material.roughness = 0.2
+// material.envMap = environmentMapTexture
 
 /**
  * Geometry 
  */
-// const sphere = new THREE.Mesh (
-//     new THREE.SphereGeometry(0.5,64,64),
-//     material
-// )
-// sphere.position.x = -1.5
+const sphere = new THREE.Mesh (
+    new THREE.SphereGeometry(0.5,64,64),
+    material
+)
+sphere.position.x = -1.5
+sphere.position.y = 1
 
-// sphere.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2)
-// )
-// const plane = new THREE.Mesh (
-//     new THREE.PlaneGeometry(1,1, 100, 100),
-//     material
-// )
+sphere.geometry.setAttribute("uv2",
+    new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2)
+)
+const plane = new THREE.Mesh (
+    new THREE.PlaneGeometry(10,10, 100, 100),
+    material
+)
+plane.rotation.x = - (Math.PI / 2)
 
-// plane.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
-// )
+plane.geometry.setAttribute("uv2",
+    new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
+)
 
-// const torus = new THREE.Mesh (
-//     new THREE.TorusGeometry(0.3,0.2,64,128),
-//     material
-// )
-// torus.position.x = 1.5
+const torus = new THREE.Mesh (
+    new THREE.TorusGeometry(0.3,0.2,64,128),
+    material
+)
+torus.position.x = 1.5
+torus.position.y = 1
 
-// torus.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2)
-// )
+torus.geometry.setAttribute("uv2",
+    new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2)
+)
 
-// scene.add(sphere, plane, torus)
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(0.75,0.75,0.75, 16, 16, 16),
+    material
+)
+cube.position.y = 1
+scene.add(sphere, plane, torus, cube)
 
 /**
  * Lights
