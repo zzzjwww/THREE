@@ -22,7 +22,7 @@ const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
 const doorMetalnessTexture = textureLoader.load("/textures/door/Metalness.jpg")
 const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
 
-const matcapTexture = textureLoader.load("/textures/matcaps/1.png")
+const matcapTexture = textureLoader.load("/textures/matcaps/7.png")
 const gradientTexture = textureLoader.load("/textures/gradients/3.jpg")
 gradientTexture.minFilter = THREE.NearestFilter
 gradientTexture.magFilter = THREE.NearestFilter
@@ -46,7 +46,7 @@ fontLoader.load(
      "/fonts/helvetiker_regular.typeface.json",
      (font)=>{
          const textGeometry = new TextGeometry(
-         "ZIJIAN, HELLO!",
+         "Hello! Welcome to GreenDon.",
          {
              font:font,
              size: 0.5,
