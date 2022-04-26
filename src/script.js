@@ -4,8 +4,16 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js"
 import { TextGeometry} from "three/examples/jsm/geometries/TextGeometry.js"
 import { RGBA_ASTC_10x10_Format } from 'three'
+import * as dat from 'lil-gui'
 
+const parameters = {
+    color: 0xff0000
+}
 
+/**
+ * Debug
+ */
+ const gui = new dat.GUI()
 
 
 /**
@@ -194,15 +202,25 @@ scene.add(sphere, plane, torus, cube)
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-scene.add(ambientLight)
+const ambientLight = new THREE.AmbientLight(0xffffff,0.5)
 
-const pointLight = new THREE.PointLight(0xffffff, 0.5)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
 
-scene.add(pointLight)
+const directtionalLight = new THREE.DirectionalLight(0x00fffc,0.3)
+directtionalLight.position.set(1,0.25,0)
+
+const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0xff0000,1)
+
+const pointLight = new THREE.PointLight(0xff9000,0.5,2)
+pointLight.position.set( 1,0.5,1)
+
+scene.add(ambientLight, directtionalLight,hemisphereLight,pointLight)
+
+gui.add(ambientLight, "intensity").min(0).max(1).step(0.01).name("AmbientLight")
+gui.add(directtionalLight, "intensity").min(0).max(1).step(0.01).name("DirectionalLight")
+gui.add(directtionalLight.position, "x").min(-1).max(1).step(0.01).name("DirectionalLightX")
+gui.addColor(parameters,"color").onChange(()=>{
+    hemisphereLight.color.set(parameters.color)
+}).name("SkyLightColor")
 
 /**
  * Sizes
@@ -259,13 +277,13 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
     //Update objects
-    // sphere.rotation.y = 0.1 * elapsedTime
-    // plane.rotation.y = 0.1 * elapsedTime
-    // torus.rotation.y = 0.1 * elapsedTime
+    sphere.rotation.y = 0.1 * elapsedTime
+    cube.rotation.y = 0.1 * elapsedTime
+    torus.rotation.y = 0.1 * elapsedTime
 
-    // sphere.rotation.x = 0.15 * elapsedTime
-    // plane.rotation.x = 0.15 * elapsedTime
-    // torus.rotation.x = 0.15 * elapsedTime
+    sphere.rotation.x = 0.15 * elapsedTime
+    cube.rotation.x = 0.15 * elapsedTime
+    torus.rotation.x = 0.15 * elapsedTime
 
     // Update controls
     controls.update()
