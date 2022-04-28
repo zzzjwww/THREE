@@ -161,43 +161,44 @@ material.roughness = 0.1
 /**
  * Geometry 
  */
-const sphere = new THREE.Mesh (
-    new THREE.SphereGeometry(0.5,64,64),
-    material
-)
-sphere.position.x = -1.5
-sphere.position.y = 1
+// const sphere = new THREE.Mesh (
+//     new THREE.SphereGeometry(0.5,64,64),
+//     material
+// )
+// sphere.position.x = -1.5
+// sphere.position.y = 1
 
-sphere.geometry.setAttribute("uv2",
-    new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2)
-)
+// sphere.geometry.setAttribute("uv2",
+//     new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2)
+// )
 const plane = new THREE.Mesh (
-    new THREE.PlaneGeometry(10,10, 100, 100),
+    new THREE.PlaneGeometry(5,5),
     material
 )
 plane.rotation.x = - (Math.PI / 2)
+plane.receiveShadow = true
+// plane.geometry.setAttribute("uv2",
+//     new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
+// )
 
-plane.geometry.setAttribute("uv2",
-    new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
-)
+// const torus = new THREE.Mesh (
+//     new THREE.TorusGeometry(0.3,0.2,64,128),
+//     material
+// )
+// torus.position.x = 1.5
+// torus.position.y = 1
 
-const torus = new THREE.Mesh (
-    new THREE.TorusGeometry(0.3,0.2,64,128),
-    material
-)
-torus.position.x = 1.5
-torus.position.y = 1
-
-torus.geometry.setAttribute("uv2",
-    new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2)
-)
+// torus.geometry.setAttribute("uv2",
+//     new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2)
+// )
 
 const cube = new THREE.Mesh(
     new THREE.BoxGeometry(0.75,0.75,0.75, 16, 16, 16),
     material
 )
 cube.position.y = 1
-scene.add(sphere, plane, torus, cube)
+cube.castShadow = true
+scene.add(plane,cube)
 
 /**
  * Lights
@@ -206,54 +207,73 @@ const ambientLight = new THREE.AmbientLight(0xffffff,0.5)
 
 
 const directtionalLight = new THREE.DirectionalLight(0x00fffc,0.3)
-directtionalLight.position.set(1,0.25,0)
+directtionalLight.position.set(2,2,1)
 
-const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0xff0000,1)
 
-const pointLight = new THREE.PointLight(0xff9000,0.5,3)
-pointLight.position.set( 1,0.5,1)
+directtionalLight.castShadow = true
 
-const recAreaLight = new THREE.RectAreaLight(0x4e00ff,2,4,4)
-recAreaLight.position.set(1,-0.5,1)
-recAreaLight.lookAt(new THREE.Vector3())
+directtionalLight.shadow.mapSize.width = 1024
+directtionalLight.shadow.mapSize.height = 1024
 
-const spotLight = new THREE.SpotLight(0x78ff00,0.5,10,Math.PI * 0.1,0.25,1)
-spotLight.position.set(0,2,3)
-scene.add(spotLight.target)
-spotLight.target.position.x = 2
+directtionalLight.shadow.camera.top = 2
+directtionalLight.shadow.camera.right = 2
+directtionalLight.shadow.camera.bottom = -2
+directtionalLight.shadow.camera.left = -2
 
-scene.add(ambientLight, directtionalLight,hemisphereLight,pointLight, recAreaLight,spotLight)
+directtionalLight.shadow.camera.near = 1
+directtionalLight.shadow.camera.far = 6
+
+const directtionalLightCameraHelper = new THREE.CameraHelper(directtionalLight.shadow.camera)
+scene.add(directtionalLightCameraHelper)
+
+// const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0xff0000,1)
+
+// const pointLight = new THREE.PointLight(0xff9000,0.5,3)
+// pointLight.position.set( 1,0.5,1)
+
+// const recAreaLight = new THREE.RectAreaLight(0x4e00ff,2,4,4)
+// recAreaLight.position.set(1,-0.5,1)
+// recAreaLight.lookAt(new THREE.Vector3())
+
+// const spotLight = new THREE.SpotLight(0x78ff00,0.5,10,Math.PI * 0.1,0.25,1)
+// spotLight.position.set(0,2,3)
+// scene.add(spotLight.target)
+// spotLight.target.position.x = 2
+
+scene.add(ambientLight, directtionalLight)
 
 gui.add(ambientLight, "intensity").min(0).max(1).step(0.01).name("AmbientLight")
 gui.add(directtionalLight, "intensity").min(0).max(1).step(0.01).name("DirectionalLight")
 gui.add(directtionalLight.position, "x").min(-1).max(1).step(0.01).name("DirectionalLightX")
-gui.addColor(parameters,"color").onChange(()=>{
-    hemisphereLight.color.set(parameters.color)
-}).name("SkyLightColor")
+// gui.addColor(parameters,"color").onChange(()=>{
+//     hemisphereLight.color.set(parameters.color)
+// }).name("SkyLightColor")
 
 
-//Helper
-const axesHelper = new THREE.AxesHelper()
-scene.add(axesHelper)
+/**
+ * Helpers
+ */
+// const axesHelper = new THREE.AxesHelper()
+// scene.add(axesHelper)
 
-const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight,0.5)
-scene.add(hemisphereLightHelper)
+// const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight,0.5)
+// scene.add(hemisphereLightHelper)
 
-const directtionalLightHelper = new THREE.DirectionalLightHelper(directtionalLight,0.2)
-scene.add(directtionalLightHelper)
+// const directtionalLightHelper = new THREE.DirectionalLightHelper(directtionalLight,0.2)
+// scene.add(directtionalLightHelper)
 
-const pointLightHelper = new THREE.PointLightHelper(pointLight,0.2)
-scene.add(pointLightHelper)
+// const pointLightHelper = new THREE.PointLightHelper(pointLight,0.2)
+// scene.add(pointLightHelper)
 
-const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(spotLightHelper)
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+// scene.add(spotLightHelper)
 
-window.requestAnimationFrame(()=>{
-    spotLightHelper.update()
-})
+// window.requestAnimationFrame(()=>{
+//     spotLightHelper.update()
+// })
 
-const rectAreaLightHelper = new RectAreaLightHelper(recAreaLight)
-scene.add(rectAreaLightHelper)
+// const rectAreaLightHelper = new RectAreaLightHelper(recAreaLight)
+// scene.add(rectAreaLightHelper)
 /**
  * Sizes
  */
@@ -300,6 +320,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
+renderer.shadowMap.enabled = true
+
 /**
  * Animate
  */
@@ -309,13 +331,13 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
     //Update objects
-    sphere.rotation.y = 0.1 * elapsedTime
-    cube.rotation.y = 0.1 * elapsedTime
-    torus.rotation.y = 0.1 * elapsedTime
+    // sphere.rotation.y = 0.1 * elapsedTime
+    // cube.rotation.y = 0.1 * elapsedTime
+    // torus.rotation.y = 0.1 * elapsedTime
 
-    sphere.rotation.x = 0.15 * elapsedTime
-    cube.rotation.x = 0.15 * elapsedTime
-    torus.rotation.x = 0.15 * elapsedTime
+    // sphere.rotation.x = 0.15 * elapsedTime
+    // cube.rotation.x = 0.15 * elapsedTime
+    // torus.rotation.x = 0.15 * elapsedTime
 
     // Update controls
     controls.update()
