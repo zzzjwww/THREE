@@ -23,30 +23,32 @@ const parameters = {
  */
 
 const textureLoader = new THREE.TextureLoader()
-const cubeTextureLoader = new THREE.CubeTextureLoader()
+const bakedShadow = textureLoader.load("/textures/bakedshadow.jpg")
+const simpleShadow = textureLoader.load("/textures/simpleshadow.jpg")
+// const cubeTextureLoader = new THREE.CubeTextureLoader()
 
-const doorColorTexture = textureLoader.load("/textures/door/color.jpg")
-const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg")
-const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/AmbientOcclusion.jpg")
-const doorHeightTexture = textureLoader.load("/textures/door/Height.jpg")
-const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
-const doorMetalnessTexture = textureLoader.load("/textures/door/Metalness.jpg")
-const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
+// const doorColorTexture = textureLoader.load("/textures/door/color.jpg")
+// const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg")
+// const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/AmbientOcclusion.jpg")
+// const doorHeightTexture = textureLoader.load("/textures/door/Height.jpg")
+// const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
+// const doorMetalnessTexture = textureLoader.load("/textures/door/Metalness.jpg")
+// const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
 
-const matcapTexture = textureLoader.load("/textures/matcaps/6.png")
-const gradientTexture = textureLoader.load("/textures/gradients/3.jpg")
-gradientTexture.minFilter = THREE.NearestFilter
-gradientTexture.magFilter = THREE.NearestFilter
-gradientTexture.generateMipmaps = false
+// const matcapTexture = textureLoader.load("/textures/matcaps/6.png")
+// const gradientTexture = textureLoader.load("/textures/gradients/3.jpg")
+// gradientTexture.minFilter = THREE.NearestFilter
+// gradientTexture.magFilter = THREE.NearestFilter
+// gradientTexture.generateMipmaps = false
 
-const environmentMapTexture = cubeTextureLoader.load([
-    "./textures/environmentMaps/0/px.jpg",
-    "./textures/environmentMaps/0/nx.jpg",
-    "./textures/environmentMaps/0/py.jpg",
-    "./textures/environmentMaps/0/ny.jpg",
-    "./textures/environmentMaps/0/pz.jpg",
-    "./textures/environmentMaps/0/nz.jpg"
-])
+// const environmentMapTexture = cubeTextureLoader.load([
+//     "./textures/environmentMaps/0/px.jpg",
+//     "./textures/environmentMaps/0/nx.jpg",
+//     "./textures/environmentMaps/0/py.jpg",
+//     "./textures/environmentMaps/0/ny.jpg",
+//     "./textures/environmentMaps/0/pz.jpg",
+//     "./textures/environmentMaps/0/nz.jpg"
+// ])
 
 /**
  * fonts
@@ -176,7 +178,20 @@ const plane = new THREE.Mesh (
     material
 )
 plane.rotation.x = - (Math.PI / 2)
+plane.position.y = -0.5
 plane.receiveShadow = true
+
+const sphereShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.5,1.5),
+    new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        alphaMap:simpleShadow,
+        transparent:true
+    })
+)
+sphereShadow.rotation.x = - Math.PI / 2
+sphereShadow.position.y = plane.position.y + 0.01
+scene.add(sphereShadow)
 // plane.geometry.setAttribute("uv2",
 //     new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
 // )
@@ -196,17 +211,17 @@ const cube = new THREE.Mesh(
     new THREE.BoxGeometry(0.75,0.75,0.75, 16, 16, 16),
     material
 )
-cube.position.y = 1
+
 cube.castShadow = true
 scene.add(plane,cube)
 
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff,0.5)
+const ambientLight = new THREE.AmbientLight(0xffffff,0.3)
 
 
-const directtionalLight = new THREE.DirectionalLight(0x00fffc,0.3)
+const directtionalLight = new THREE.DirectionalLight(0xffffff,0.3)
 directtionalLight.position.set(2,2,1)
 
 
@@ -223,8 +238,37 @@ directtionalLight.shadow.camera.left = -2
 directtionalLight.shadow.camera.near = 1
 directtionalLight.shadow.camera.far = 6
 
-const directtionalLightCameraHelper = new THREE.CameraHelper(directtionalLight.shadow.camera)
-scene.add(directtionalLightCameraHelper)
+// directtionalLight.shadow.radius = 10
+
+// const directtionalLightCameraHelper = new THREE.CameraHelper(directtionalLight.shadow.camera)
+// scene.add(directtionalLightCameraHelper)
+
+
+//Spot Light 
+const spotLight = new THREE.SpotLight(0xffffff, 0.4, 10, Math.PI * 0.3)
+spotLight.castShadow = true
+spotLight.shadow.mapSize.width = 1024
+spotLight.shadow.mapSize.height = 1024
+spotLight.shadow.camera.fov = 30
+spotLight.shadow.camera.near = 1
+spotLight.shadow.camera.far = 6
+spotLight.position.set (0,2,2)
+
+
+scene.add(spotLight,spotLight.target)
+
+// Point light 
+const pointLight = new THREE.PointLight(0xffffff,0.3)
+pointLight.castShadow = true
+pointLight.shadow.camera.near = 0.1
+pointLight.shadow.camera.far = 3
+pointLight.position.set (-1, 1, 0 )
+scene.add(pointLight)
+
+// const pointLightHelper = new THREE.CameraHelper(pointLight.shadow.camera)
+// scene.add(pointLightHelper)
+// // const spotLightHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+// scene.add(spotLightHelper)
 
 // const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0xff0000,1)
 
@@ -320,7 +364,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-renderer.shadowMap.enabled = true
+renderer.shadowMap.enabled = false
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 /**
  * Animate
@@ -331,6 +376,16 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
     //Update objects
+
+    cube.position.x = Math.cos(elapsedTime)
+    cube.position.z = Math.sin(elapsedTime)
+    cube.position.y = Math.abs(Math.sin(elapsedTime * 3))
+
+    //update shadow
+
+    sphereShadow.position.x = cube.position.x
+    sphereShadow.position.z = cube.position.z
+    sphereShadow.material.opacity = (1 - cube.position.y) * 0.3
     // sphere.rotation.y = 0.1 * elapsedTime
     // cube.rotation.y = 0.1 * elapsedTime
     // torus.rotation.y = 0.1 * elapsedTime
