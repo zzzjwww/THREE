@@ -1,323 +1,226 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js"
-import { TextGeometry} from "three/examples/jsm/geometries/TextGeometry.js"
-import { RGBA_ASTC_10x10_Format, SpotLightHelper } from 'three'
 import * as dat from 'lil-gui'
-import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper.js'
-
-
-const parameters = {
-    color: 0xff0000
-}
-
-/**
- * Debug
- */
- const gui = new dat.GUI()
-
-
-/**
- * Txtures
- */
-
-const textureLoader = new THREE.TextureLoader()
-const bakedShadow = textureLoader.load("/textures/bakedshadow.jpg")
-const simpleShadow = textureLoader.load("/textures/simpleshadow.jpg")
-// const cubeTextureLoader = new THREE.CubeTextureLoader()
-
-// const doorColorTexture = textureLoader.load("/textures/door/color.jpg")
-// const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg")
-// const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/AmbientOcclusion.jpg")
-// const doorHeightTexture = textureLoader.load("/textures/door/Height.jpg")
-// const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
-// const doorMetalnessTexture = textureLoader.load("/textures/door/Metalness.jpg")
-// const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
-
-// const matcapTexture = textureLoader.load("/textures/matcaps/6.png")
-// const gradientTexture = textureLoader.load("/textures/gradients/3.jpg")
-// gradientTexture.minFilter = THREE.NearestFilter
-// gradientTexture.magFilter = THREE.NearestFilter
-// gradientTexture.generateMipmaps = false
-
-// const environmentMapTexture = cubeTextureLoader.load([
-//     "./textures/environmentMaps/0/px.jpg",
-//     "./textures/environmentMaps/0/nx.jpg",
-//     "./textures/environmentMaps/0/py.jpg",
-//     "./textures/environmentMaps/0/ny.jpg",
-//     "./textures/environmentMaps/0/pz.jpg",
-//     "./textures/environmentMaps/0/nz.jpg"
-// ])
-
-/**
- * fonts
-
-const fontLoader = new FontLoader()
-fontLoader.load(
-     "/fonts/helvetiker_regular.typeface.json",
-     (font)=>{
-         const textGeometry = new TextGeometry(
-         "Hello! Welcome to GreenDon.",
-         {
-             font:font,
-             size: 0.5,
-             height:0.2,
-             curveSegment: 5,
-             bevelEnabled: true,
-             bevelThickness: 0.03,
-             bevelSize: 0.02,
-             bevelOffset: 0,
-             bevelSegments: 3
-         }
-         )
-         textGeometry.center()
-         const textMaterial = new THREE.MeshMatcapMaterial()
-         textMaterial.matcap = matcapTexture
-         const text = new THREE.Mesh(textGeometry,textMaterial)
-         scene.add(text)
-
-         const donutGeometry = new THREE.TorusGeometry(0.3,0.2,20,45)
-         const donutMaterial = new THREE.MeshMatcapMaterial({matcap: matcapTexture})
-         
-         for (let i = 0; i<100; i++) {
-             const donuts = new THREE.Mesh(donutGeometry,donutMaterial)
-             
-             donuts.position.x = (Math.random() - 0.5) * 10
-             donuts.position.y = (Math.random() - 0.5) * 10
-             donuts.position.z = (Math.random() - 0.5) * 10
-        
-             donuts.rotation.x = (Math.random() - 0.5) * Math.PI
-             donuts.rotation.x = (Math.random() - 0.5) * Math.PI
-        
-             const scale = Math.random()
-             donuts.scale.set(scale, scale, scale)
-             scene.add(donuts)
-         }
-     }
- )
- 
- */
-
+import { PCFShadowMap } from 'three'
 
 /**
  * Base
  */
+// Debug
+const gui = new dat.GUI()
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
+
+
 
 // Scene
 const scene = new THREE.Scene()
 
+//Fog
+const fog = new THREE.Fog("#262837",2,15)
+scene.fog = fog
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
+const doorColorTexture = textureLoader.load("/textures/door/color.jpg")
+const doorAlphaTexture = textureLoader.load("/textures/door/Alpha.jpg")
+const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/AmbientOcclusion.jpg")
+const doorHeightTexture = textureLoader.load("/textures/door/Height.jpg")
+const doorNormalTexture = textureLoader.load("/textures/door/Normal.jpg")
+const doorMetalnessTexture = textureLoader.load("/textures/door/color.jpg")
+const doorRoughnessTexture = textureLoader.load("/textures/door/Roughness.jpg")
+
+const bricksColorTexture = textureLoader.load("/textures/bricks/color.jpg")
+const bricksAmbientOcclusionTexture = textureLoader.load("/textures/bricks/AmbientOcclusion.jpg")
+const bricksNormalTexture = textureLoader.load("/textures/bricks/normal.jpg")
+const bricksRoughnessTexture = textureLoader.load("/textures/bricks/Roughness.jpg")
+
+const grassColorTexture = textureLoader.load("/textures/grass/color.jpg")
+const grassAmbientOcclusionTexture = textureLoader.load("/textures/grass/AmbientOcclusion.jpg")
+const grassNormalTexture = textureLoader.load("/textures/grass/normal.jpg")
+const grassRoughnessTexture = textureLoader.load("/textures/grass/Roughness.jpg")
+
+grassColorTexture.repeat.set(8,8)
+grassAmbientOcclusionTexture.repeat.set(8,8)
+grassNormalTexture.repeat.set(8,8)
+grassRoughnessTexture.repeat.set(8,8)
+
+grassColorTexture.wrapS = THREE.RepeatWrapping
+grassAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
+grassNormalTexture.wrapS = THREE.RepeatWrapping
+grassRoughnessTexture.wrapS = THREE.RepeatWrapping
+
+grassColorTexture.wrapT = THREE.RepeatWrapping
+grassAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping
+grassNormalTexture.wrapT = THREE.RepeatWrapping
+grassRoughnessTexture.wrapT = THREE.RepeatWrapping
+
 
 
 /**
- * Objects
+ * House
  */
-
-// const material = new THREE.MeshBasicMaterial()
-// material.map = doorColorTexture
-// material.color.set("green")
-// material.opacity = 0.5
-// material.transparent = true
-// material.alphaMap = doorAlphaTexture
-// material.side = THREE.DoubleSide
-
-// const material = new THREE.MeshNormalMaterial()
-// material.flatShading = true
-
-// const material = new THREE.MeshMatcapMaterial()
-// material.matcap = matcapTexture
-
-// const material = new THREE.MeshDepthMaterial()
-
-// const material = new THREE.MeshLambertMaterial()
-
-// const material = new THREE.MeshPhongMaterial()
-// material.shininess = 100
-// material.specular = new THREE.Color("red")
-
-// const material = new THREE.MeshToonMaterial()
-// material.gradientMap = gradientTexture
-
-const material = new THREE.MeshStandardMaterial()
-// material.metalness = 0.45
-material.roughness = 0.1
-// material.map = doorColorTexture
-// material.aoMap = doorAmbientOcclusionTexture
-// material.aoMapIntensity = 1
-// material.displacementMap = doorHeightTexture
-// material.displacementScale = 0.1
-// material.metalnessMap = doorMetalnessTexture
-// material.roughnessMap = doorRoughnessTexture
-// material.normalMap = doorNormalTexture
-// material.normalScale.set(0.5,0.5)
-// material.transparent = true
-// material.alphaMap = doorAlphaTexture
-
-// const material = new THREE.MeshStandardMaterial()
-// material.metalness = 1
-// material.roughness = 0.2
-// material.envMap = environmentMapTexture
-
-/**
- * Geometry 
- */
-// const sphere = new THREE.Mesh (
-//     new THREE.SphereGeometry(0.5,64,64),
-//     material
-// )
-// sphere.position.x = -1.5
-// sphere.position.y = 1
-
-// sphere.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2)
-// )
-const plane = new THREE.Mesh (
-    new THREE.PlaneGeometry(5,5),
-    material
-)
-plane.rotation.x = - (Math.PI / 2)
-plane.position.y = -0.5
-plane.receiveShadow = true
-
-const sphereShadow = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.5,1.5),
-    new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        alphaMap:simpleShadow,
-        transparent:true
+//group
+const house = new THREE.Group()
+scene.add(house)
+//walls 
+const walls = new THREE.Mesh(
+    new THREE.BoxGeometry(4,2.5,4),
+    new THREE.MeshStandardMaterial({
+        map: bricksColorTexture,
+        aoMap:bricksAmbientOcclusionTexture,
+        normalMap:bricksNormalTexture,
+        // roughness:bricksRoughnessTexture
     })
 )
-sphereShadow.rotation.x = - Math.PI / 2
-sphereShadow.position.y = plane.position.y + 0.01
-scene.add(sphereShadow)
-// plane.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2)
-// )
+walls.geometry.setAttribute(
+    "uv2",
+    new THREE.Float32BufferAttribute(walls.geometry.attributes.uv.array,2)
+)
+walls.position.y = 2.5 / 2
+house.add(walls)
 
-// const torus = new THREE.Mesh (
-//     new THREE.TorusGeometry(0.3,0.2,64,128),
-//     material
-// )
-// torus.position.x = 1.5
-// torus.position.y = 1
+// roof
 
-// torus.geometry.setAttribute("uv2",
-//     new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2)
-// )
+const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(3.5,1,4),
+    new THREE.MeshStandardMaterial({color:"#b35f45"})
+)
+roof.position.y = 2.5 + 0.5
+roof.rotation.y = Math.PI / 4
+house.add(roof)
 
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.75,0.75,0.75, 16, 16, 16),
-    material
+//Door 
+
+const door = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.2,2.2,100,100),
+    new THREE.MeshStandardMaterial({
+        map:doorColorTexture,
+        transparent:true,
+        alphaMap:doorAlphaTexture,
+        aoMap:doorAmbientOcclusionTexture,
+        displacementMap:doorHeightTexture,
+        displacementScale: 0.1,
+        normalMap:doorNormalTexture,
+        metalnessMap:doorMetalnessTexture,
+        roughnessMap:doorRoughnessTexture
+    })
+)
+door.geometry.setAttribute(
+    "uv2",
+    new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array,2)
+)
+door.position.z = 4/2 + 0.01
+door.position.y = 1
+house.add(door)
+
+//bushes 
+const bushGeometry = new THREE.SphereGeometry(1,16,16)
+const bushMaterial = new THREE.MeshStandardMaterial({color:"#89c854"})
+
+const bush1 = new THREE.Mesh(bushGeometry,bushMaterial)
+bush1.scale.set(0.5,0.8,0.5)
+bush1.position.set(0.8,0.2,2.2)
+
+const bush2 = new THREE.Mesh(bushGeometry,bushMaterial)
+bush2.scale.set(0.25,0.25,0.25)
+bush2.position.set(1.4,0.2,2.2)
+
+const bush3 = new THREE.Mesh(bushGeometry,bushMaterial)
+bush3.scale.set(0.25,0.25,0.25)
+bush3.position.set(-1.4,0.2,2.5)
+
+const bush4 = new THREE.Mesh(bushGeometry,bushMaterial)
+bush4.scale.set(0.25,0.75,0.25)
+bush4.position.set(-1.1,0.4,2.2)
+
+house.add(bush1,bush2,bush3,bush4)
+
+//graves 
+const graves = new THREE.Group()
+scene.add(graves)
+
+const graveGeometry = new THREE.BoxGeometry(0.6,0.8,0.2)
+const graveMaterial = new THREE.MeshStandardMaterial({color:"#b2b6b1"})
+
+for(let i = 0; i<50; i++){
+    const angle = Math.random() * Math.PI * 2
+    const radius = 3 + Math.random() * 6
+    const x = Math.sin(angle) * radius
+    const z = Math.cos(angle) * radius
+
+    const grave = new THREE.Mesh(graveGeometry,graveMaterial)
+    grave.position.set(x, 0.3, z)
+    grave.rotation.y = (Math.random()- 0.5)* 0.4
+    grave.rotation.z = (Math.random()- 0.5)* 0.4
+    grave.castShadow = true
+    graves.add(grave)
+}
+// Floor
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 20),
+    new THREE.MeshStandardMaterial({ 
+        map:grassColorTexture,
+        aoMap:grassAmbientOcclusionTexture,
+        normalMap:grassNormalTexture,
+        // roughness:grassRoughnessTexture
+
+    })
 )
 
-cube.castShadow = true
-scene.add(plane,cube)
+floor.geometry.setAttribute(
+    "uv2",
+    new THREE.Float32BufferAttribute(floor.geometry.attributes.uv.array,2)
+)
+floor.rotation.x = - Math.PI * 0.5
+floor.position.y = 0
+
+scene.add(floor)
 
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff,0.3)
+// Ambient light
+const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.12)
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+scene.add(ambientLight)
+
+// Directional light
+const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.12)
+moonLight.position.set(4, 5, - 2)
+gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
+gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
+scene.add(moonLight)
 
 
-const directtionalLight = new THREE.DirectionalLight(0xffffff,0.3)
-directtionalLight.position.set(2,2,1)
+//Door light
 
+const doorLight = new THREE.PointLight("#ff7d46",1,6)
+doorLight.position.set(0,2.2,2.6)
+house.add(doorLight)
 
-directtionalLight.castShadow = true
-
-directtionalLight.shadow.mapSize.width = 1024
-directtionalLight.shadow.mapSize.height = 1024
-
-directtionalLight.shadow.camera.top = 2
-directtionalLight.shadow.camera.right = 2
-directtionalLight.shadow.camera.bottom = -2
-directtionalLight.shadow.camera.left = -2
-
-directtionalLight.shadow.camera.near = 1
-directtionalLight.shadow.camera.far = 6
-
-// directtionalLight.shadow.radius = 10
-
-// const directtionalLightCameraHelper = new THREE.CameraHelper(directtionalLight.shadow.camera)
-// scene.add(directtionalLightCameraHelper)
-
-
-//Spot Light 
-const spotLight = new THREE.SpotLight(0xffffff, 0.4, 10, Math.PI * 0.3)
-spotLight.castShadow = true
-spotLight.shadow.mapSize.width = 1024
-spotLight.shadow.mapSize.height = 1024
-spotLight.shadow.camera.fov = 30
-spotLight.shadow.camera.near = 1
-spotLight.shadow.camera.far = 6
-spotLight.position.set (0,2,2)
-
-
-scene.add(spotLight,spotLight.target)
-
-// Point light 
-const pointLight = new THREE.PointLight(0xffffff,0.3)
-pointLight.castShadow = true
-pointLight.shadow.camera.near = 0.1
-pointLight.shadow.camera.far = 3
-pointLight.position.set (-1, 1, 0 )
-scene.add(pointLight)
-
-// const pointLightHelper = new THREE.CameraHelper(pointLight.shadow.camera)
-// scene.add(pointLightHelper)
-// // const spotLightHelper = new THREE.CameraHelper(spotLight.shadow.camera)
-// scene.add(spotLightHelper)
-
-// const hemisphereLight = new THREE.HemisphereLight(0x0000ff,0xff0000,1)
-
-// const pointLight = new THREE.PointLight(0xff9000,0.5,3)
-// pointLight.position.set( 1,0.5,1)
-
-// const recAreaLight = new THREE.RectAreaLight(0x4e00ff,2,4,4)
-// recAreaLight.position.set(1,-0.5,1)
-// recAreaLight.lookAt(new THREE.Vector3())
-
-// const spotLight = new THREE.SpotLight(0x78ff00,0.5,10,Math.PI * 0.1,0.25,1)
-// spotLight.position.set(0,2,3)
-// scene.add(spotLight.target)
-// spotLight.target.position.x = 2
-
-scene.add(ambientLight, directtionalLight)
-
-gui.add(ambientLight, "intensity").min(0).max(1).step(0.01).name("AmbientLight")
-gui.add(directtionalLight, "intensity").min(0).max(1).step(0.01).name("DirectionalLight")
-gui.add(directtionalLight.position, "x").min(-1).max(1).step(0.01).name("DirectionalLightX")
-// gui.addColor(parameters,"color").onChange(()=>{
-//     hemisphereLight.color.set(parameters.color)
-// }).name("SkyLightColor")
-
+//helper 
+// const pointLightHelper = new THREE.PointLightHelper( doorLight, 1);
+// scene.add( pointLightHelper );
 
 /**
- * Helpers
+ * Ghost
  */
-// const axesHelper = new THREE.AxesHelper()
-// scene.add(axesHelper)
+const ghost1 = new THREE.PointLight("#ff00ff",2,3)
+scene.add(ghost1)
 
-// const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight,0.5)
-// scene.add(hemisphereLightHelper)
+const ghost2 = new THREE.PointLight("#00ffff",2,3)
+scene.add(ghost2)
 
-// const directtionalLightHelper = new THREE.DirectionalLightHelper(directtionalLight,0.2)
-// scene.add(directtionalLightHelper)
+const ghost3 = new THREE.PointLight("#ffff00",2,3)
+scene.add(ghost3)
 
-// const pointLightHelper = new THREE.PointLightHelper(pointLight,0.2)
-// scene.add(pointLightHelper)
-
-// const spotLightHelper = new THREE.SpotLightHelper(spotLight)
-// scene.add(spotLightHelper)
-
-// window.requestAnimationFrame(()=>{
-//     spotLightHelper.update()
-// })
-
-// const rectAreaLightHelper = new RectAreaLightHelper(recAreaLight)
-// scene.add(rectAreaLightHelper)
 /**
  * Sizes
  */
@@ -346,9 +249,9 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 1
-camera.position.y = 1
-camera.position.z = 2
+camera.position.x = 4
+camera.position.y = 2
+camera.position.z = 5
 scene.add(camera)
 
 // Controls
@@ -363,9 +266,55 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setClearColor("#262837")
 
-renderer.shadowMap.enabled = false
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
+/**
+ * shadows
+ */
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = PCFShadowMap
+
+moonLight.castShadow = true
+doorLight.castShadow = true
+ghost1.castShadow = true
+ghost2.castShadow = true
+ghost3.castShadow = true
+
+walls.castShadow = true
+bush1.castShadow = true
+bush2.castShadow = true
+bush3.castShadow = true
+bush4.castShadow = true
+
+floor.receiveShadow = true
+
+moonLight.shadow.mapSize.width = 256
+moonLight.shadow.mapSize.height = 256
+moonLight.shadow.camera.far = 15
+
+// ...
+
+doorLight.shadow.mapSize.width = 256
+doorLight.shadow.mapSize.height = 256
+doorLight.shadow.camera.far = 7
+
+// ...
+
+ghost1.shadow.mapSize.width = 256
+ghost1.shadow.mapSize.height = 256
+ghost1.shadow.camera.far = 7
+
+// ...
+
+ghost2.shadow.mapSize.width = 256
+ghost2.shadow.mapSize.height = 256
+ghost2.shadow.camera.far = 7
+
+// ...
+
+ghost3.shadow.mapSize.width = 256
+ghost3.shadow.mapSize.height = 256
+ghost3.shadow.camera.far = 7
 
 /**
  * Animate
@@ -375,25 +324,22 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
-    //Update objects
 
-    cube.position.x = Math.cos(elapsedTime)
-    cube.position.z = Math.sin(elapsedTime)
-    cube.position.y = Math.abs(Math.sin(elapsedTime * 3))
+    //Update ghost
+    const ghost1Angle = elapsedTime * 0.5
+    ghost1.position.x = Math.cos(ghost1Angle) * 4
+    ghost1.position.z = Math.sin(ghost1Angle) * 4
+    ghost1.position.y = Math.sin(ghost1Angle) * 3
 
-    //update shadow
+    const ghost2Angle =  - elapsedTime * 0.32
+    ghost2.position.x = Math.cos(ghost2Angle) * 4
+    ghost2.position.z = Math.sin(ghost2Angle) * 4
+    ghost2.position.y = Math.sin(ghost2Angle * 6)
 
-    sphereShadow.position.x = cube.position.x
-    sphereShadow.position.z = cube.position.z
-    sphereShadow.material.opacity = (1 - cube.position.y) * 0.3
-    // sphere.rotation.y = 0.1 * elapsedTime
-    // cube.rotation.y = 0.1 * elapsedTime
-    // torus.rotation.y = 0.1 * elapsedTime
-
-    // sphere.rotation.x = 0.15 * elapsedTime
-    // cube.rotation.x = 0.15 * elapsedTime
-    // torus.rotation.x = 0.15 * elapsedTime
-
+    const ghost3Angle = elapsedTime * 0.18
+    ghost3.position.x = Math.cos(ghost3Angle) * (7+ Math.sin(elapsedTime * 0.2))
+    ghost3.position.z = Math.sin(ghost3Angle) * (7+ Math.sin(elapsedTime * 0.3))
+    ghost3.position.y = Math.sin(ghost3Angle * 3)
     // Update controls
     controls.update()
 
