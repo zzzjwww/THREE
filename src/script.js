@@ -25,14 +25,14 @@ const textureLoader = new THREE.TextureLoader()
  */
 //Geometry
 const particlesGeometry = new THREE.BufferGeometry()
-const count = 50
-const verticeList = []
+const count = 500
+const vertices = new Float32Array(count*3)
+console.log(vertices)
 for (let i = 0; i< count * 3; i++){
-    const point = Math.floor(Math.random() * 10)
-    verticeList.push(point)
+    vertices[i] = (Math.random() - 0.5) * 10
 }
+console.log(vertices)
 
-const vertices = Float32Array.from(verticeList)
 particlesGeometry.setAttribute("position",new THREE.BufferAttribute(vertices,3))
 
 const particlesMaterial = new THREE.PointsMaterial({
